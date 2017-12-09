@@ -1,5 +1,6 @@
 const char* mqtt_pubt_addr = "ATSH28/SNOWPROJ/SENS/1/addr";
 const char* mqtt_pubt_temp = "ATSH28/SNOWPROJ/TEMP/1/value";
+const char* mqtt_pubt_fan = "ATSH28/SNOWPROJ/FAN/1/state";
 
 Ticker ticker_mqtt;
 volatile boolean gv_tick_mqtt = true;
@@ -21,21 +22,21 @@ void pub_temp( float iv_temp ) {
   client.publish(mqtt_pubt_temp, buffer, true);
 }
 
-void tick_mqtt(){
+void tick_mqtt() {
   gv_tick_mqtt = true;
 }
 
-void init_mqtt_l(const char* iv_clientname){
+void init_mqtt_l(const char* iv_clientname) {
   init_mqtt(iv_clientname);
 
   ticker_mqtt.attach(60, tick_mqtt);
 }
 
-void check_mqtt_l(){
+void check_mqtt_l() {
   check_mqtt();
 
-    if (gv_tick_mqtt == true ){
-        //pub_addr( insideThermometer);
+  if (gv_tick_mqtt == true ) {
+    //pub_addr( insideThermometer);
     pub_temp( gv_tempC );
     gv_tick_mqtt = false;
   }

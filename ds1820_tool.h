@@ -79,7 +79,7 @@ void init_ds1820(void)
   DebugPrint(sensors.getResolution(insideThermometer), DEC);
   DebugPrintln();
 
-  ticker_ds1820.attach(30, tick_ds1820);
+  ticker_ds1820.attach(10, tick_ds1820);
 }
 
 // function to print the temperature for a device

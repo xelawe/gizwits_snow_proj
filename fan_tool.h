@@ -29,20 +29,16 @@ void check_fan() {
     stop_fan();
   }
 
-  if (gv_start_rot == true) {
-    //ticker_rot.detach();
+  if (gv_start_fan == true) {
     digitalWrite(motfanpin, HIGH);
+   // client.publish(mqtt_pubt_fan, "1", true);
     gv_start_fan = false;
-    //int lv_timeRun = random(1, 4);
-    //ticker_rot.attach(lv_timeRun, stop_rot);
   }
 
-  if (gv_stop_rot == true) {
-    //ticker_rot.detach();
+  if (gv_stop_fan == true) {
     digitalWrite(motfanpin, LOW);
-    gv_stop_rot = false;
-    //int lv_timeWait = random(15, 45);
-    //ticker_rot.attach(lv_timeWait, start_rot);
+   // client.publish(mqtt_pubt_fan, "0", true);
+    gv_stop_fan = false;
   }
 
 }

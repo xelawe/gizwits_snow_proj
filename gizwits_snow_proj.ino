@@ -25,6 +25,23 @@
 int LDRValue;
 
 
+
+
+
+void set_led(int iv_pin, int iv_val) {
+  switch (iv_val) {
+    case 0:
+      digitalWrite(iv_pin, LOW);
+      break;
+    case 255:
+      digitalWrite(iv_pin, HIGH);
+      break;
+    default:
+      analogWrite(iv_pin, iv_val);
+      break;
+  }
+}
+
 void set_rgb(int iv_red, int iv_green, int iv_blue, int iv_LDRvalue) {
 
   int lv_green = iv_green * iv_LDRvalue / 1023;
@@ -34,16 +51,15 @@ void set_rgb(int iv_red, int iv_green, int iv_blue, int iv_LDRvalue) {
   set_rgb(lv_red, lv_green, lv_blue);
 
 }
-
 void set_rgb(int iv_red, int iv_green, int iv_blue) {
 
   int lv_green = iv_green * 0.8;
   int lv_red = iv_red;
   int lv_blue = iv_blue;
 
-  analogWrite(ledpinrt, lv_red);
-  analogWrite(ledpingn, lv_green);
-  analogWrite(ledpinbl, lv_blue);
+  set_led(ledpingn, lv_green);
+  set_led(ledpinrt, lv_red);
+  set_led(ledpinbl, lv_blue);
 }
 
 void setup() {
@@ -64,13 +80,18 @@ void setup() {
   init_ota("GizSnowPr");
 
   init_mqtt_l("GizSnowPr");
+
+  set_rgb(255, 0, 0);
   init_ds1820();
   delay(500);
 
   check_ds1820();
   check_mqtt_l();
 
+
+  set_rgb(0, 0, 255);
   init_fan();
+  set_rgb(0, 255, 0);
   init_rot();
 
   set_rgb(0, 0, 0);
