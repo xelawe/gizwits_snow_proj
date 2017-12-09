@@ -27,7 +27,8 @@ void check_rot() {
     digitalWrite(motrotpin, HIGH);
     gv_start_rot = false;
     int lv_timeRun = random(1, 4);
-    ticker_rot.attach(lv_timeRun, stop_rot);
+    lv_timeRun = ( lv_timeRun * 1000 ) + 300;
+    ticker_rot.attach_ms(lv_timeRun, stop_rot);
   }
 
   if (gv_stop_rot == true) {
