@@ -86,6 +86,7 @@ void loop() {
 
   LDRValue = analogRead(LDRPin);
 
+  check_fan();
   check_rot();
 
   check_mqtt_l();
