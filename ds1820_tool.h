@@ -8,11 +8,17 @@
 // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
 OneWire oneWire(ONE_WIRE_BUS);
 
-// Pass our oneWire reference to Dallas Temperature. 
+// Pass our oneWire reference to Dallas Temperature.
 DallasTemperature sensors(&oneWire);
 
 // arrays to hold device address
-DeviceAddress insideThermometer;
+DeviceAddress   insideThermometer = { 0x28, 0xFF, 0x50, 0xC4, 0x0, 0x17, 0x4, 0x9 }; //insideThermometer;
+
+
+Ticker ticker_ds1820;
+
+float gv_tempC;
+volatile boolean gv_tick_ds1820 = true;
 
 
 // function to print a device address
@@ -20,99 +26,95 @@ void printAddress(DeviceAddress deviceAddress)
 {
   for (uint8_t i = 0; i < 8; i++)
   {
-    if (deviceAddress[i] < 16) Serial.print("0");
-    Serial.print(deviceAddress[i], HEX);
+    if (deviceAddress[i] < 16) DebugPrint("0");
+    DebugPrint(deviceAddress[i], HEX);
   }
 }
 
 
+void tick_ds1820(){
+  gv_tick_ds1820 = true;
+}
+
 /*
- * Setup function. Here we do the basics
- */
+   Setup function. Here we do the basics
+*/
 void init_ds1820(void)
 {
 
-  Serial.println("Dallas Temperature IC Control Library Demo");
+  DebugPrintln("Dallas Temperature IC Control Library Demo");
 
   // locate devices on the bus
-  Serial.print("Locating devices...");
+  DebugPrint("Locating devices...");
   sensors.begin();
-  Serial.print("Found ");
-  Serial.print(sensors.getDeviceCount(), DEC);
-  Serial.println(" devices.");
+  DebugPrint("Found ");
+  DebugPrint(sensors.getDeviceCount(), DEC);
+  DebugPrintln(" devices.");
 
   // report parasite power requirements
-  Serial.print("Parasite power is: "); 
-  if (sensors.isParasitePowerMode()) Serial.println("ON");
-  else Serial.println("OFF");
-  
-  // Assign address manually. The addresses below will beed to be changed
-  // to valid device addresses on your bus. Device address can be retrieved
-  // by using either oneWire.search(deviceAddress) or individually via
-  // sensors.getAddress(deviceAddress, index)
-  // Note that you will need to use your specific address here
-  //insideThermometer = { 0x28, 0x1D, 0x39, 0x31, 0x2, 0x0, 0x0, 0xF0 };
+  DebugPrint("Parasite power is: ");
+  if (sensors.isParasitePowerMode()) {
+    DebugPrintln("ON");
+  }
+  else DebugPrintln("OFF");
 
   // Method 1:
   // Search for devices on the bus and assign based on an index. Ideally,
-  // you would do this to initially discover addresses on the bus and then 
-  // use those addresses and manually assign them (see above) once you know 
+  // you would do this to initially discover addresses on the bus and then
+  // use those addresses and manually assign them (see above) once you know
   // the devices on your bus (and assuming they don't change).
-  if (!sensors.getAddress(insideThermometer, 0)) Serial.println("Unable to find address for Device 0"); 
-  
-  // method 2: search()
-  // search() looks for the next device. Returns 1 if a new address has been
-  // returned. A zero might mean that the bus is shorted, there are no devices, 
-  // or you have already retrieved all of them. It might be a good idea to 
-  // check the CRC to make sure you didn't get garbage. The order is 
-  // deterministic. You will always get the same devices in the same order
-  //
-  // Must be called before search()
-  //oneWire.reset_search();
-  // assigns the first address found to insideThermometer
-  //if (!oneWire.search(insideThermometer)) Serial.println("Unable to find address for insideThermometer");
+  // if (!sensors.getAddress(insideThermometer, 0)) {
+  //   DebugPrintln("Unable to find address for Device 0");
+  // }
 
   // show the addresses we found on the bus
-  Serial.print("Device 0 Address: ");
+  DebugPrint("Device 0 Address: ");
   printAddress(insideThermometer);
-  Serial.println();
+  DebugPrintln();
 
   // set the resolution to 9 bit (Each Dallas/Maxim device is capable of several different resolutions)
   sensors.setResolution(insideThermometer, 9);
- 
-  Serial.print("Device 0 Resolution: ");
-  Serial.print(sensors.getResolution(insideThermometer), DEC); 
-  Serial.println();
+
+  DebugPrint("Device 0 Resolution: ");
+  DebugPrint(sensors.getResolution(insideThermometer), DEC);
+  DebugPrintln();
+
+  ticker_ds1820.attach(30, tick_ds1820);
 }
 
 // function to print the temperature for a device
-void printTemperature(DeviceAddress deviceAddress)
+void printTemperature()
 {
-  // method 1 - slower
-  //Serial.print("Temp C: ");
-  //Serial.print(sensors.getTempC(deviceAddress));
-  //Serial.print(" Temp F: ");
-  //Serial.print(sensors.getTempF(deviceAddress)); // Makes a second call to getTempC and then converts to Fahrenheit
-
   // method 2 - faster
-  float tempC = sensors.getTempC(deviceAddress);
-  Serial.print("Temp C: ");
-  Serial.print(tempC);
-  Serial.print(" Temp F: ");
-  Serial.println(DallasTemperature::toFahrenheit(tempC)); // Converts tempC to Fahrenheit
+
+  DebugPrint("Temp C: ");
+  DebugPrint(gv_tempC);
+  DebugPrint(" Temp F: ");
+  DebugPrintln(DallasTemperature::toFahrenheit(gv_tempC)); // Converts tempC to Fahrenheit
+
 }
+
 /*
- * Main function. It will request the tempC from the sensors and display on Serial.
- */
+   Main function. It will request the tempC from the sensors and display on Serial.
+*/
 void get_ds1820(void)
-{ 
-  // call sensors.requestTemperatures() to issue a global temperature 
+{
+  // call sensors.requestTemperatures() to issue a global temperature
   // request to all devices on the bus
-  Serial.print("Requesting temperatures...");
+  DebugPrint("Requesting temperatures...");
   sensors.requestTemperatures(); // Send the command to get temperatures
-  Serial.println("DONE");
-  
+  DebugPrintln("DONE");
+
+  gv_tempC = sensors.getTempC(insideThermometer);
+
   // It responds almost immediately. Let's print out the data
-  printTemperature(insideThermometer); // Use a simple function to print out the data
+  printTemperature(); // Use a simple function to print out the data
+}
+
+void check_ds1820(){
+  if (gv_tick_ds1820 == true ){
+    get_ds1820();
+    gv_tick_ds1820 = false;
+  }
 }
 

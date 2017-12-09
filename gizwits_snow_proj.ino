@@ -9,8 +9,11 @@
 
 #include "cy_wifi.h"
 #include "cy_ota.h"
+#include "cy_mqtt.h"
 #include <Ticker.h>
 #include "ds1820_tool.h"
+#include "mqtt_tool.h"
+#include "rot_tool.h"
 
 #define btnpin 4
 #define ledpinbl 13
@@ -18,7 +21,6 @@
 #define ledpingn 12
 #define LDRPin (A0)
 
-#define motrotpin 14
 #define motfanpin 5
 
 boolean gv_toggle;
@@ -32,9 +34,7 @@ int cmd = CMD_WAIT;
 int buttonState = HIGH;
 static long startPress = 0;
 
-Ticker ticker_rot;
-boolean gv_start_rot = false;
-boolean gv_stop_rot = true;
+
 
 void set_rgb(int iv_red, int iv_green, int iv_blue, int iv_LDRvalue) {
 
@@ -92,13 +92,7 @@ void IntBtn() {
   cmd = CMD_BUTTON_CHANGE;
 }
 
-void start_rot() {
-  gv_start_rot = true;
-}
 
-void stop_rot() {
-  gv_stop_rot = true;
-}
 
 void setup() {
   // put your setup code here, to run once:
@@ -118,6 +112,8 @@ void setup() {
 
   init_ota("GizSnowPr");
 
+  init_mqtt_l("GizSnowPr");
+
   set_rgb(0, 0, 0);
   delay(500);
 
@@ -134,10 +130,20 @@ void setup() {
 
   init_ds1820();
 
+
+
   //setup button
   pinMode(btnpin, INPUT);
   attachInterrupt(btnpin, IntBtn, CHANGE);
   delay(500);
+
+  //check_mqtt();
+  //pub_addr( insideThermometer);
+
+  get_ds1820();
+  check_mqtt_l();
+
+
 }
 
 void loop() {
@@ -145,23 +151,13 @@ void loop() {
 
   check_ota();
 
+  check_ds1820();
+
   LDRValue = analogRead(LDRPin);
 
-  if (gv_start_rot == true) {
-    ticker_rot.detach();
-    digitalWrite(motrotpin, HIGH);
-    gv_start_rot = false;
-    int lv_timeRun = random(1, 4);
-    ticker_rot.attach(lv_timeRun, stop_rot);
-  }
+  check_rot();
 
-  if (gv_stop_rot == true) {
-    ticker_rot.detach();
-    digitalWrite(motrotpin, LOW);
-    gv_stop_rot = false;
-    int lv_timeWait = random(15, 45);
-    ticker_rot.attach(lv_timeWait, start_rot);
-  }
+  check_mqtt_l();
 
   switch (cmd) {
     case CMD_WAIT:
