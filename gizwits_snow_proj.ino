@@ -11,56 +11,16 @@
 #include "cy_ota.h"
 #include "cy_mqtt.h"
 #include <Ticker.h>
+#include "led_tool.h"
 #include "ds1820_tool.h"
 #include "mqtt_tool.h"
 #include "rot_tool.h"
 #include "fan_tool.h"
 
 #define btnpin 4
-#define ledpinbl 13
-#define ledpinrt 15
-#define ledpingn 12
 #define LDRPin (A0)
 
 int LDRValue;
-
-
-
-
-
-void set_led(int iv_pin, int iv_val) {
-  switch (iv_val) {
-    case 0:
-      digitalWrite(iv_pin, LOW);
-      break;
-    case 255:
-      digitalWrite(iv_pin, HIGH);
-      break;
-    default:
-      analogWrite(iv_pin, iv_val);
-      break;
-  }
-}
-
-void set_rgb(int iv_red, int iv_green, int iv_blue, int iv_LDRvalue) {
-
-  int lv_green = iv_green * iv_LDRvalue / 1023;
-  int lv_red = iv_red * iv_LDRvalue / 1023;
-  int lv_blue = iv_blue * iv_LDRvalue / 1023;
-
-  set_rgb(lv_red, lv_green, lv_blue);
-
-}
-void set_rgb(int iv_red, int iv_green, int iv_blue) {
-
-  int lv_green = iv_green * 0.8;
-  int lv_red = iv_red;
-  int lv_blue = iv_blue;
-
-  set_led(ledpingn, lv_green);
-  set_led(ledpinrt, lv_red);
-  set_led(ledpinbl, lv_blue);
-}
 
 void setup() {
   // put your setup code here, to run once:
@@ -70,6 +30,10 @@ void setup() {
 #endif
 
   DebugPrintln("\n" + String(__DATE__) + ", " + String(__TIME__) + " " + String(__FILE__));
+
+//  pinMode(ledpinbl, OUTPUT);
+//  pinMode(ledpingn, OUTPUT);
+//  pinMode(ledpinrt, OUTPUT);
 
   set_rgb(255, 255, 255);
   delay(500);
