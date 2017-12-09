@@ -23,7 +23,7 @@ void init_fan() {
 
 void check_fan() {
 
-  if ( gv_tempC > 26 ) {
+  if ( gv_tempC > 30 ) {
     start_fan();
   } else {
     stop_fan();
