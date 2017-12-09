@@ -13,6 +13,14 @@ void stop_rot() {
   gv_stop_rot = true;
 }
 
+void init_rot() {
+  pinMode(motrotpin, OUTPUT);
+
+  digitalWrite(motrotpin, HIGH);
+  delay(3000);
+  digitalWrite(motrotpin, LOW);
+}
+
 void check_rot() {
   if (gv_start_rot == true) {
     ticker_rot.detach();

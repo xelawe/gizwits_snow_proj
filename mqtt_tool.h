@@ -35,6 +35,7 @@ void check_mqtt_l(){
   check_mqtt();
 
     if (gv_tick_mqtt == true ){
+        //pub_addr( insideThermometer);
     pub_temp( gv_tempC );
     gv_tick_mqtt = false;
   }
