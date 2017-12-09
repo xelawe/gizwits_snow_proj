@@ -10,6 +10,7 @@
 #include "cy_wifi.h"
 #include "cy_ota.h"
 #include <Ticker.h>
+#include "ds1820_tool.h"
 
 #define btnpin 4
 #define ledpinbl 13
@@ -130,6 +131,8 @@ void setup() {
   digitalWrite(motrotpin, HIGH);
   delay(3000);
   digitalWrite(motrotpin, LOW);
+
+  init_ds1820();
 
   //setup button
   pinMode(btnpin, INPUT);
