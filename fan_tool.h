@@ -25,7 +25,7 @@ void check_fan() {
 
   if ( gv_tempC > 30 ) {
     start_fan();
-  } else {
+  } elseif ( gv_tempC < 26 ) {
     stop_fan();
   }
 
